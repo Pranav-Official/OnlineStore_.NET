@@ -1,0 +1,16 @@
+ID,Category,ProductName,Details,Price,Stock
+1,Smartphone,Apple iPhone 13,128GB - Midnight,79999,50
+2,Smartphone,Samsung Galaxy S21,128GB - Phantom Gray,64999,45
+3,Smartphone,OnePlus 9 Pro,256GB - Pine Green,64999,30
+4,Smartphone,Xiaomi Mi 11X Pro,128GB - Cosmic Black,39999,60
+5,Laptop,Apple MacBook Air,M1 - 13.3 inch,92999,25
+6,Laptop,HP Pavilion,x360 - 14 inch,55999,20
+7,Laptop,Dell XPS 13,10th Gen Intel - 13.4 inch,149999,15
+8,Laptop,Asus ROG Zephyrus G14,AMD Ryzen 9 - 14 inch,114999,10
+9,Tablet,Apple iPad Pro,11 inch - Wi-Fi,71999,35
+10,Tablet,Samsung Galaxy Tab S7,11 inch - Wi-Fi,55999,40
+11,Tablet,Lenovo Tab P11 Pro,11.5 inch - Wi-Fi,49999,25
+12,Smartwatch,Apple Watch Series 6,GPS - 44mm,42999,50
+13,Smartwatch,Samsung Galaxy Watch 4,Bluetooth - 42mm,24999,60
+14,Smartwatch,Fossil Gen 5,44mm - Smoke Stainless Steel,22999,40
+15,Smartwatch,Fitbit Versa 3,GPS - Midnight Blue/Gold,19999,55

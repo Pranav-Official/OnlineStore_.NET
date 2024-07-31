@@ -30,3 +30,12 @@ D:\Work\.NET training\OnlineStore\OnlineStore\obj\Debug\net8.0\refint\OnlineStor
 D:\Work\.NET training\OnlineStore\OnlineStore\obj\Debug\net8.0\OnlineStore.pdb
 D:\Work\.NET training\OnlineStore\OnlineStore\obj\Debug\net8.0\OnlineStore.genruntimeconfig.cache
 D:\Work\.NET training\OnlineStore\OnlineStore\obj\Debug\net8.0\ref\OnlineStore.dll
+D:\Work\.NET training\OnlineStore\OnlineStore\obj\Debug\net8.0\OnlineStore.sourcelink.json
+D:\Work\.NET training\OnlineStore\OnlineStore\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Work\.NET training\OnlineStore\OnlineStore\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\Work\.NET training\OnlineStore\OnlineStore\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\Work\.NET training\OnlineStore\OnlineStore\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\Work\.NET training\OnlineStore\OnlineStore\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+D:\Work\.NET training\OnlineStore\OnlineStore\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\Work\.NET training\OnlineStore\OnlineStore\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\Work\.NET training\OnlineStore\OnlineStore\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

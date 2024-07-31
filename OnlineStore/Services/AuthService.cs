@@ -6,5 +6,7 @@ namespace OnlineStore.Services
     {
         void Register(Users user);
         bool Login(string userName, string password, out string role);
+
+        string GenerateJwt(string userName, string password, string role);
     }
 }

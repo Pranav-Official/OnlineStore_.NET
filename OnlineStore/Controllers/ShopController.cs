@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineStore.Models;
 using OnlineStore.Services;
@@ -10,39 +11,15 @@ namespace OnlineStore.Controllers
     {
         public IProductService _productService;
         public IPurchaseService _purchaseService;
-        public IAuthenticationService _authService;
 
-        public ShopController(IProductService productService, IPurchaseService purchaseService,IAuthenticationService authService)
+        public ShopController(IProductService productService, IPurchaseService purchaseService)
         {
             _productService = productService;
             _purchaseService = purchaseService;
-            _authService = authService;
         }
 
-        [HttpPost("signup")]
-        public IActionResult Register(Users user)
-        {
-            try
-            {
-                _authService.Register(user);
-                return Ok(new { Status = "success", Message = "User Registered up successfully." });
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(new { Status = "fail", Error = ex.Message });
-            }
-        }
 
-        [HttpPost("login")]
-        public IActionResult Login(string userName, string password)
-        {
-            if (_authService.Login(userName, password, out var role))
-            {
-                return Ok(new { Status = "success", Role = role });
-            }
-            return Unauthorized(new { Status = "fail", Error = "Invalid credentials" });
-        }
-
+        [Authorize]
         [HttpGet]
         public ActionResult<ApiResponse<IEnumerable<Products>>> Get()
         {
@@ -70,6 +47,7 @@ namespace OnlineStore.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{id}", Name = "GetProductById")]
         public ActionResult<ApiResponse<Products>> GetById(string id)
         {
@@ -111,6 +89,7 @@ namespace OnlineStore.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost(Name = "AddProduct")]
         public IActionResult AddProduct(Products product)
         {
@@ -131,6 +110,7 @@ namespace OnlineStore.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("BuyProduct")]
         public ActionResult<ApiResponse<string>> BuyProductById(string ProductId, int Quantity)
         {
@@ -174,6 +154,7 @@ namespace OnlineStore.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("DeleteProduct")]
         public ActionResult<ApiResponse<string>> DeleteProduct(string productId)
         {
@@ -215,6 +196,7 @@ namespace OnlineStore.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("GetPurchaseRecord")]
         public ActionResult<ApiResponse<IEnumerable<Purchase>>> GetSales()
         {

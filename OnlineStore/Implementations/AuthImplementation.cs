@@ -1,6 +1,11 @@
 ﻿using OnlineStore.Services;
 using OnlineStore.Models;
 using System.Data;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace OnlineStore.Implementations
 {
@@ -44,6 +49,26 @@ namespace OnlineStore.Implementations
             return false;
         }
 
+        public string GenerateJwt(string userName, string password, string role)
+        {
+            var key = "thisisasecretkey1234567890987654321";
+            var keyBytes = Encoding.UTF8.GetBytes(key);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                 {
+                 new Claim(ClaimTypes.NameIdentifier, userName)
+                 }),
+                Expires = DateTime.UtcNow.AddMinutes(30),
+                SigningCredentials = new SigningCredentials(
+                                      new SymmetricSecurityKey(keyBytes),
+                                      SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
         private IEnumerable<Users> RetrieveUsers()
         {
             var userList = new List<Users>();
@@ -77,5 +102,6 @@ namespace OnlineStore.Implementations
             }
             return userList;
         }
+
     }
 }

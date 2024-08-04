@@ -1,9 +1,14 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using OnlineStore.Exceptions;
 using OnlineStore.Models;
 using OnlineStore.Services;
 using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace OnlineStore.Controllers
 {
@@ -12,34 +17,59 @@ namespace OnlineStore.Controllers
     public class AuthController : ControllerBase
     {
         public IAuthenticationService _authService;
+        public readonly IConfiguration configuration;
 
         public AuthController(IAuthenticationService authService, IConfiguration configuration)
         {
             _authService = authService;
+            this.configuration = configuration;
         }
 
         [HttpPost("signup")]
-        public IActionResult Register(Users user)
+        public async Task<IActionResult> RegisterAsync(Users user)
         {
             try
             {
-                _authService.Register(user);
-                var token = _authService.GenerateJwt(user.UserName, user.Password, user.Role);
-                var response = new { Status = "success", Data = token };
+                await _authService.Register(user);
+                var response = new { Status = "success" };
                 return Ok(response);
             }
-            catch (System.Exception ex)
+            catch (UserAlreadyExistsException ex)
             {
-                return BadRequest(new { Status = "fail", Error = ex.Message});
+                return BadRequest(new { Status = "fail", Error = ex.Message });
+            }
+            catch (Exception)
+            {
+                // Log the exception if needed
+                return StatusCode(500, new { Status = "fail", Error = "An unexpected error occurred." });
             }
         }
 
         [HttpPost("login")]
-        public IActionResult Login(string userName, string password)
+        public async Task<IActionResult> LoginAsync(string userName, string password)
         {
-            if (_authService.Login(userName, password, out var role))
+
+            var User = await _authService.LoginAsync(userName, password);
+
+            if (User.UserName != "")
             {
-                return Ok(new { Status = "success", Role = role });
+                var claims = new[]
+                {
+                    new Claim("Role", User.Role),
+                    new Claim("UserName", userName),
+                };
+                var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("uweqyrtweuqwerytqweuirytqwueyrtuweqyrtweuqwerytqweuirytqwueyrt"));
+                var Signing = new SigningCredentials(Key, SecurityAlgorithms.HmacSha256);
+
+                var Token = new JwtSecurityToken(
+                    "Issuer",
+                    "Audiance",
+                    claims,
+                    expires: DateTime.UtcNow.AddHours(1),
+                    signingCredentials: Signing
+                    );
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(Token);
+                return Ok(new { Status = "success", Token = tokenString });
             }
             return Unauthorized(new { Status = "fail", Error = "Invalid credentials" });
         }

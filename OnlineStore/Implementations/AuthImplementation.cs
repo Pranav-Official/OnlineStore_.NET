@@ -6,21 +6,21 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using OnlineStore.Exceptions;
 
 namespace OnlineStore.Implementations
 {
     public class AuthImplementation : IAuthenticationService
     {
         private readonly string _userFilePath = "D:\\Work\\.NET training\\OnlineStore\\OnlineStore\\users.txt";
+        private readonly MongoDBService _mongoDbService;
 
-        public void Register(Users newUser)
+        public AuthImplementation(MongoDBService mongoDbService)
         {
-            var userList = RetrieveUsers().ToList();
-
-            if (userList.Any(user => user.UserName == newUser.UserName))
-            {
-                throw new Exception("This username is already taken.");
-            }
+            _mongoDbService = mongoDbService;
+        }
+        public async Task Register(Users newUser)
+        {
 
             var userToAdd = new Users
             {
@@ -29,78 +29,38 @@ namespace OnlineStore.Implementations
                 Role = newUser.Role
             };
 
-            using (var fileWriter = new StreamWriter(_userFilePath, true))
+            if (await _mongoDbService.IfUserExistsAsync(userToAdd))
             {
-                fileWriter.WriteLine($"{userToAdd.UserName},{userToAdd.Password},{userToAdd.Role}");
+                throw new UserAlreadyExistsException("User with this username already exists.");
             }
+            else
+            {
+                await _mongoDbService.CreateUserAsync(userToAdd);
+            }
+
         }
 
-        public bool Login(string userName, string password, out string userRole)
+        public async Task<Users> LoginAsync(string userName, string password)
         {
-            userRole = null;
-            var users = RetrieveUsers();
-            var authenticatedUser = users.FirstOrDefault(user => user.UserName == userName && user.Password == password);
-
-            if (authenticatedUser != null)
+            var userToAdd = new Users
             {
-                userRole = authenticatedUser.Role;
-                return true;
-            }
-            return false;
-        }
-
-        public string GenerateJwt(string userName, string password, string role)
-        {
-            var key = "thisisasecretkey1234567890987654321";
-            var keyBytes = Encoding.UTF8.GetBytes(key);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                 {
-                 new Claim(ClaimTypes.NameIdentifier, userName)
-                 }),
-                Expires = DateTime.UtcNow.AddMinutes(30),
-                SigningCredentials = new SigningCredentials(
-                                      new SymmetricSecurityKey(keyBytes),
-                                      SecurityAlgorithms.HmacSha256Signature)
+                UserName = userName,
+                Password = password,
+                Role = " "
             };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
 
-        private IEnumerable<Users> RetrieveUsers()
-        {
-            var userList = new List<Users>();
-
-            using (var fileReader = new StreamReader(_userFilePath))
+            var authUser = await _mongoDbService.GetUser(userToAdd);
+            if (authUser != null)
             {
-                bool skipFirstLine = true;
-                while (!fileReader.EndOfStream)
-                {
-                    var currentLine = fileReader.ReadLine();
-                    if (skipFirstLine)
-                    {
-                        skipFirstLine = false;
-                        continue;
-                    }
-
-                    var userFields = currentLine?.Split(',');
-
-                    if (userFields?.Length != 3)
-                    {
-                        continue;
-                    }
-
-                    userList.Add(new Users
-                    {
-                        UserName = userFields[0],
-                        Password = userFields[1],
-                        Role = userFields[2]
-                    });
-                }
+                return authUser;
             }
-            return userList;
+
+            return new Users
+            {
+                UserName = "",
+                Password = "",
+                Role = " "
+            };
         }
 
     }

@@ -2,3 +2,4 @@ username,password,role
 string,string,string
 pranav,1qa2ws3ed,customer
 masin,1qa2ws3ed,customer
+boss,bossman,boss

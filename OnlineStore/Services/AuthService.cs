@@ -4,9 +4,8 @@ namespace OnlineStore.Services
 {
     public interface IAuthenticationService
     {
-        void Register(Users user);
-        bool Login(string userName, string password, out string role);
+        Task Register(Users user);
+        Task<Users> LoginAsync(string userName, string password);
 
-        string GenerateJwt(string userName, string password, string role);
     }
 }

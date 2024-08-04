@@ -18,8 +18,6 @@ namespace OnlineStore.Controllers
             _purchaseService = purchaseService;
         }
 
-
-        [Authorize]
         [HttpGet]
         public ActionResult<ApiResponse<IEnumerable<Products>>> Get()
         {
@@ -47,7 +45,7 @@ namespace OnlineStore.Controllers
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("{id}", Name = "GetProductById")]
         public ActionResult<ApiResponse<Products>> GetById(string id)
         {
@@ -89,7 +87,7 @@ namespace OnlineStore.Controllers
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost(Name = "AddProduct")]
         public IActionResult AddProduct(Products product)
         {
@@ -110,7 +108,7 @@ namespace OnlineStore.Controllers
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPut("BuyProduct")]
         public ActionResult<ApiResponse<string>> BuyProductById(string ProductId, int Quantity)
         {
@@ -154,7 +152,7 @@ namespace OnlineStore.Controllers
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpDelete("DeleteProduct")]
         public ActionResult<ApiResponse<string>> DeleteProduct(string productId)
         {
@@ -196,7 +194,7 @@ namespace OnlineStore.Controllers
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("GetPurchaseRecord")]
         public ActionResult<ApiResponse<IEnumerable<Purchase>>> GetSales()
         {

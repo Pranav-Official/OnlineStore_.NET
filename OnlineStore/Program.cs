@@ -7,33 +7,37 @@ using OnlineStore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using OnlineStore.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<MongoDbSetting>(builder.Configuration.GetSection("MongoDB"));
+builder.Services.AddSingleton<MongoDBService>();
 
 // Add services to the container.
 
 
 builder.Services.AddControllers();
 
-builder.Services.AddAuthentication(option =>
-{
-    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(jwtOption =>
-{
-    var key = builder.Configuration.GetValue<string>("JwtSettings:Key");
-    var keyBytes = Encoding.ASCII.GetBytes(key);
-    jwtOption.SaveToken = true;
-    jwtOption.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(cfg => {
+    cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    cfg.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x => {
+    x.RequireHttpsMetadata = false;
+    x.SaveToken = false;
+    x.TokenValidationParameters = new TokenValidationParameters
     {
-        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-        ValidateLifetime = true,
-        ValidateAudience = true,
-        ValidateIssuer = true
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8
+            .GetBytes("uweqyrtweuqwerytqweuirytqwueyrtuweqyrtweuqwerytqweuirytqwueyrt")
+        ),
+        ValidateIssuer = false,
+        ValidateAudience = false,
     };
 });
-builder.Services.AddAuthorization();
+builder.Services.AddMvc();
 
 builder.Services.AddScoped<IAuthenticationService, AuthImplementation>();
 builder.Services.AddScoped<IProductService, ProductImplementation>();
@@ -53,8 +57,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
-app.UseAuthorization();
+app.UseAuthentication();
 
 app.MapControllers();
 

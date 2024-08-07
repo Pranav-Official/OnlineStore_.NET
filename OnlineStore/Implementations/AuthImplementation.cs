@@ -28,15 +28,7 @@ namespace OnlineStore.Implementations
                 Password = newUser.Password,
                 Role = newUser.Role
             };
-
-            if (await _mongoDbService.IfUserExistsAsync(userToAdd))
-            {
-                throw new UserAlreadyExistsException("User with this username already exists.");
-            }
-            else
-            {
-                await _mongoDbService.CreateUserAsync(userToAdd);
-            }
+            await _mongoDbService.RegisterAsync(userToAdd);
 
         }
 

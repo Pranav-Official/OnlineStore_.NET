@@ -5,6 +5,6 @@ namespace OnlineStore.Services
 {
     public interface IPurchaseService
     {
-        IEnumerable<Purchase> GetPurchaseRecord();
+        Task<List<Purchase>> GetPurchaseRecord();
     }
 }

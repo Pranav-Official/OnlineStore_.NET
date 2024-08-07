@@ -1,4 +1,5 @@
-﻿using OnlineStore.Models;
+﻿using OnlineStore.Exceptions;
+using OnlineStore.Models;
 using OnlineStore.Services;
 using System;
 using System.Collections.Generic;
@@ -12,138 +13,65 @@ namespace OnlineStore.Implementations
         private readonly string _productFilePath = "D:\\Work\\.NET training\\OnlineStore\\OnlineStore\\prducts.csv";
         private readonly string _salesFilePath = "D:\\Work\\.NET training\\OnlineStore\\OnlineStore\\purchaseReport.csv";
 
-        public IEnumerable<Products> GetProducts()
+        private readonly MongoDBService _mongoDbService;
+
+        public ProductImplementation(MongoDBService mongoDbService)
         {
-            var productList = new List<Products>();
+            _mongoDbService = mongoDbService;
+        }
 
-            using (var reader = new StreamReader(_productFilePath))
-            {
-                bool skipHeader = true;
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-
-                    if (skipHeader)
-                    {
-                        skipHeader = false;
-                        continue;
-                    }
-
-                    var values = line?.Split(',');
-
-                    if (values?.Length != 6)
-                    {
-                        Console.WriteLine($"Malformed line: {line}");
-                        continue;
-                    }
-
-                    try
-                    {
-                        var product = new Products
-                        {
-                            ID = values[0],
-                            Category = values[1],
-                            ProductName = values[2],
-                            Desription = values[3],
-                            Price = decimal.Parse(values[4]),
-                            Stock = int.Parse(values[5])
-                        };
-                        productList.Add(product);
-                    }
-                    catch (FormatException ex)
-                    {
-                        Console.WriteLine($"Error parsing line: {line}. Details: {ex.Message}");
-                    }
-                }
-            }
+        public async Task<List<Products>> GetProductsAsync()
+        {
+            var productList = await _mongoDbService.getAllProducts();
 
             return productList;
         }
 
-        public Products GetProductById(string id)
+        public async Task<Products> GetProductByIdAsync(string id)
         {
-            var products = GetProducts();
-            return products.FirstOrDefault(p => p.ID.Equals(id));
+            var products = await GetProductsAsync();
+            return products.FirstOrDefault(p => p.ProductId.Equals(id));
         }
 
-        public void AddProducts(Products product)
+        public async void AddProducts(Products product)
         {
-            var csvLine = $"{product.ID},{product.Category},{product.ProductName},{product.Desription},{product.Price},{product.Stock}";
-
-            using (var writer = new StreamWriter(_productFilePath, true))
-            {
-                writer.WriteLine(csvLine);
-            }
+            await _mongoDbService.AddProducts(product);
         }
 
-        public string BuyProduct(string productId, int quantity)
+        public async Task BuyProductAsync(string productId, int quantity)
         {
-            var productList = GetProducts().ToList();
-            var selectedProduct = productList.FirstOrDefault(p => p.ID.Equals(productId));
+            var productList = (await GetProductsAsync()).ToList();
+            var selectedProduct = productList.FirstOrDefault(p => p.ProductId.Equals(productId));
 
             if (selectedProduct == null)
             {
-                return "Product not available";
+                throw new KeyNotFoundException($"No product found with ID: {productId}");
             }
 
             if (selectedProduct.Stock < quantity)
             {
-                return "Not enough stock";
+                throw new NotEnoughStock("Not enough stock to proceed with order");
             }
 
-            selectedProduct.Stock -= quantity;
+            var newStock = selectedProduct.Stock - quantity;
 
-            using (var writer = new StreamWriter(_productFilePath, false))
-            {
-                writer.WriteLine("ID,Category,ProductName,Details,Price,Stock");
-                foreach (var prod in productList)
-                {
-                    writer.WriteLine($"{prod.ID},{prod.Category},{prod.ProductName},{prod.Desription},{prod.Price},{prod.Stock}");
-                }
-            }
+            await _mongoDbService.UpdateProductStockAsync(productId, newStock);
 
             var sale = new Purchase
             {
-                ProductID = selectedProduct.ID,
+                ProductID = selectedProduct.ProductId,
                 Quantity = quantity,
                 Rate = selectedProduct.Price,
                 Price = selectedProduct.Price * quantity,
                 Date = DateTime.Now
             };
 
-            var saleCsvLine = $"{sale.ProductID},{sale.Quantity},{sale.Rate},{sale.Price},{sale.Date}";
-            using (var writer = new StreamWriter(_salesFilePath, true))
-            {
-                writer.WriteLine(saleCsvLine);
-            }
-
-            return "Product purchased successfully";
+            await _mongoDbService.AddPurchaseAsync(sale);
         }
 
-        public string DeleteProduct(string productId)
-        {
-            var productList = GetProducts().ToList();
-            var productToRemove = productList.FirstOrDefault(p => p.ID.Equals(productId));
-
-            Console.WriteLine(productToRemove);
-
-            if (productToRemove == null)
-            {
-                return "Product does not exist";
-            }
-
-            productList.Remove(productToRemove);
-
-            using (var writer = new StreamWriter(_productFilePath))
-            {
-                writer.WriteLine("ID,Category,ProductName,Details,Price,Stock");
-                foreach (var prod in productList)
-                {
-                    writer.WriteLine($"{prod.ID},{prod.Category},{prod.ProductName},{prod.Desription},{prod.Price},{prod.Stock}");
-                }
-            }
-
-            return $"{productToRemove.ProductName} has been successfully deleted";
+        public async Task DeleteProductAsync(string productId)
+        { 
+                await _mongoDbService.DeleteProductAsync(productId);
         }
     }
 }

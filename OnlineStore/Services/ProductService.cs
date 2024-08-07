@@ -4,10 +4,10 @@ namespace OnlineStore.Services
 {
     public interface IProductService
     {
-       IEnumerable<Products> GetProducts();
-       Products GetProductById(string id);
-       void AddProducts(Products product);
-       string BuyProduct(string ProductId, int Quantity);
-       string DeleteProduct(string id);
+       Task<List<Products>> GetProductsAsync();
+        Task<Products> GetProductByIdAsync(string id);
+        void AddProducts(Products product);
+        Task BuyProductAsync(string ProductId, int Quantity);
+        Task DeleteProductAsync(string id);
     }
 }

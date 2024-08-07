@@ -34,9 +34,9 @@ namespace OnlineStore.Controllers
                 var response = new { Status = "success" };
                 return Ok(response);
             }
-            catch (UserAlreadyExistsException ex)
+            catch (UserAlreadyExistsException)
             {
-                return BadRequest(new { Status = "fail", Error = ex.Message });
+                return StatusCode(401, new { Status = "fail", Error = "User already Exists" });
             }
             catch (Exception)
             {

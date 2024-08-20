@@ -30,7 +30,7 @@ namespace DemoWebShop.Tests
         [InlineData(new[] { "This", "is", "a", "test" }, false, "Thisisatest")]
         [InlineData(new[] { "This", "is", "a", "test" }, true, "This is a test ")]
         [InlineData(new[] { "SingleWord" }, false, "SingleWord")]
-        [InlineData(new[] { "SingleWord" }, true, "SingleWord ")]
+        [InlineData(new[] { "SingleWord" }, false, "SingleWord ")]
         public void UtilityService_ConcatenateStrings_ReturnsCorrectString(string[] strings, bool includeSpaces, string expected)
         {
             // Arrange
